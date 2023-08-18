@@ -1,40 +1,59 @@
-let btn = document.getElementById("addNewBtn")
-let todos = document.getElementsByClassName("todos")[0]
-let i = 1;
+const textBox = document.getElementById("text-box");
+const taskContainer = document.getElementById("task-container");
+const addButton = document.querySelector("button");
 
-for(let x=1 ; x<=localStorage.length ; x++)
-{
-    let p = document.createElement("p")
-    p.innerHTML = localStorage.getItem(`task${x}`);
-    todos.prepend(p)
+// Add task when "Enter" key is pressed in the input box
+textBox.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    event.preventDefault(); // Prevent the default "Enter" key behavior
+    addButton.click(); // Trigger the click event on the "Add" button
+  }
+});
+
+function addTask() {
+  if (textBox.value === "") {
+    alert("You must enter something!");
+  } else {
+    let li = document.createElement("li");
+    li.innerHTML =
+      textBox.value +
+      '<span class="edit">\u270E</span><span class="delete">\u274C</span>';
+    taskContainer.appendChild(li);
+    textBox.value = "";
+    saveData();
+  }
 }
 
-const addTask = () => {
-    
-    let input = document.createElement("input")
-    input.setAttribute(`id`,`task${i}`)
-    input.style.display = "block"
-    input.autofocus = true
-    input.placeholder = "Add task and press Enter"
-    todos.append(input) 
+taskContainer.addEventListener(
+  "click",
+  function (e) {
+    if (e.target.tagName === "LI") {
+      e.target.classList.toggle("checked");
+      saveData();
+    } else if (e.target.classList.contains("edit")) {
+      editTask(e.target.parentElement);
+    } else if (e.target.classList.contains("delete")) {
+      e.target.parentElement.remove();
+      saveData();
+    }
+  },
+  false
+);
 
-    document.addEventListener('keydown', function(event) {
-        if (event.code == 'Enter') {
-            let userInput = document.getElementById(`task${i}`).value
-            localStorage.setItem(`task${i}` , userInput)
-
-            let getInput = document.getElementById(`task${i}`)
-            getInput.remove()
-
-            let printtask = document.createElement("p")
-            printtask.innerHTML = localStorage.getItem(`task${i}`)
-            todos.prepend(printtask)
-            i++;
-        }
-    });
-    
+function editTask(taskItem) {
+  const text = taskItem.firstChild.textContent;
+  const newText = prompt("Edit the task:", text);
+  if (newText !== null) {
+    taskItem.firstChild.textContent = newText;
+    saveData();
+  }
 }
-btn.addEventListener("click" , addTask)
 
+function saveData() {
+  localStorage.setItem("data", taskContainer.innerHTML);
+}
 
-
+function showData() {
+  taskContainer.innerHTML = localStorage.getItem("data");
+}
+showData();
